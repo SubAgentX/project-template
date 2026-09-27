@@ -1,0 +1,36 @@
+# --- Dependencies ---
+node_modules/
+vendor/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# --- Build output ---
+dist/
+build/
+out/
+target/
+*.egg-info/
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+*.local
+
+# --- Logs ---
+*.log
+logs/
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# --- Test & coverage ---
+coverage/
+.coverage
+.nyc_output/
