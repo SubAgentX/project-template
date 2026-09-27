@@ -77,7 +77,9 @@ Write-Host '==> Tidying .gitkeep placeholders'
 foreach ($keep in Get-ChildItem -LiteralPath $root -Recurse -Force -File -Filter '.gitkeep') {
     $siblings = Get-ChildItem -LiteralPath $keep.DirectoryName -Force |
                 Where-Object { $_.Name -ne '.gitkeep' }
-    $relative = [System.IO.Path]::GetRelativePath($root, $keep.FullName)
+    # Substring rather than [System.IO.Path]::GetRelativePath: that method is
+    # .NET Core only, and Windows PowerShell 5.1 runs on .NET Framework.
+    $relative = $keep.FullName.Substring($root.Length).TrimStart('\','/')
     if ($siblings) {
         Remove-Item -LiteralPath $keep.FullName -Force
         Write-Host "    removed $relative (directory has content)"
