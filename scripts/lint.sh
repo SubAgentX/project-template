@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 #
-# Lint this project. Run locally with `./scripts/lint.sh`; CI runs the same
-# script, so a green run here means a green run there.
+# Lint this project. Run locally with `./scripts/lint.sh`; CI runs this on
+# Linux and macOS and scripts/lint.ps1 on Windows.
+#
+# Keep this file and scripts/lint.ps1 doing the same thing. CI runs both, so
+# a difference between them shows up as one platform failing.
 #
 # Replace the body below with your linter. Exit non-zero on failure — CI
 # decides pass or fail from this script's exit status.
@@ -15,4 +18,4 @@
 set -euo pipefail
 
 echo "No linter configured yet."
-echo "Edit scripts/lint.sh to add one — see the comments at the top of the file."
+echo "Edit scripts/lint.sh and scripts/lint.ps1 to add one."

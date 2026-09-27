@@ -17,8 +17,13 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
-    runs-on: ubuntu-latest
+    name: Lint (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Report every platform. One failure should not hide the others.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v7
 
@@ -26,7 +31,7 @@ jobs:
       # Add your language's setup step here. A few common ones:
       #
       #   - uses: actions/setup-node@v7
-      #     with: { node-version: '20', cache: 'npm' }
+      #     with: { node-version: '22', cache: 'npm' }
       #
       #   - uses: actions/setup-python@v7
       #     with: { python-version: '3.12', cache: 'pip' }
@@ -35,10 +40,12 @@ jobs:
       #     with: { go-version: '1.22', cache: true }
       #
       # Then install dependencies, e.g. `npm ci` or `pip install -r
-      # requirements.txt`, before the step below runs.
+      # requirements.txt`, before the steps below run.
       # ---------------------------------------------------------------
 
       - name: Run linter
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
           if [ -x scripts/lint.sh ]; then
             ./scripts/lint.sh
@@ -46,18 +53,44 @@ jobs:
             echo "::notice title=Lint skipped::scripts/lint.sh is missing or not executable."
           fi
 
+      - name: Run linter
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (Test-Path scripts/lint.ps1) {
+            ./scripts/lint.ps1
+          } else {
+            Write-Host "::notice title=Lint skipped::scripts/lint.ps1 is missing."
+          }
+
   test:
-    name: Test
-    runs-on: ubuntu-latest
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v7
 
-      # Add the same setup and dependency-install steps as above.
+      # Add the same setup and dependency-install steps as in the lint job.
 
       - name: Run tests
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
           if [ -x scripts/test.sh ]; then
             ./scripts/test.sh
           else
             echo "::notice title=Tests skipped::scripts/test.sh is missing or not executable."
           fi
+
+      - name: Run tests
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (Test-Path scripts/test.ps1) {
+            ./scripts/test.ps1
+          } else {
+            Write-Host "::notice title=Tests skipped::scripts/test.ps1 is missing."
+          }

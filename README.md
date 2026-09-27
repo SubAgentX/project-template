@@ -104,8 +104,10 @@ usually enough.
 ├── scripts/                # Setup, build, deploy and maintenance scripts
 │   ├── init.sh             # One-time bootstrap (bash); deletes itself
 │   ├── init.ps1            # Same, for Windows PowerShell
-│   ├── lint.sh             # Lint entry point — CI calls this
-│   └── test.sh             # Test entry point — CI calls this
+│   ├── lint.sh             # Lint entry point (bash) — CI calls this
+│   ├── lint.ps1            # Same, for Windows
+│   ├── test.sh             # Test entry point (bash) — CI calls this
+│   └── test.ps1            # Same, for Windows
 ├── src/                    # Application source code
 ├── tests/                  # Automated tests, mirroring the src/ layout
 ├── .editorconfig           # Editor formatting rules shared across IDEs
@@ -184,30 +186,64 @@ Document every environment variable in `.env.example`. Keep this table in sync.
 
 ## Testing
 
+**macOS, Linux, Git Bash or WSL:**
+
 ```bash
 ./scripts/test.sh          # run the test suite
 ./scripts/lint.sh          # run the linter
 ```
 
-Both start as stubs that print a reminder and exit 0. Edit them to call your
-real tools — the comments at the top of each file list the usual commands per
-language. Exit non-zero on failure; CI reads the exit status.
+**Windows PowerShell:**
+
+```powershell
+./scripts/test.ps1
+./scripts/lint.ps1
+```
+
+All four start as stubs that print a reminder and exit 0. Edit them to call
+your real tools — the comments at the top of each file list the usual commands
+per language. Exit non-zero on failure; CI reads the exit status.
+
+Each pair must stay in step: `lint.sh` and `lint.ps1` should do the same thing,
+as should `test.sh` and `test.ps1`. CI runs both halves of each pair, so a
+difference shows up as one platform failing rather than as a silent surprise
+when you switch machines.
+
+> **PowerShell gotcha:** a failing native command does *not* fail a PowerShell
+> script — it carries on and still exits 0, which would turn a broken test
+> suite into a green build. The `.ps1` stubs already set
+> `$PSNativeCommandUseErrorActionPreference` to prevent that on PowerShell 7.3+.
+> On Windows PowerShell 5.1, check `$LASTEXITCODE` after each command instead.
 
 Explain here how to run a single test once the suite exists.
 
 ## Continuous integration
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to
-`main` and on every pull request. It runs `scripts/lint.sh` and
-`scripts/test.sh` as two parallel jobs, so a failure tells you which one broke.
+`main` and on every pull request. Lint and test are separate jobs, so a failure
+names itself, and each runs on **Ubuntu, Windows and macOS**:
 
-Because CI calls the same scripts you run locally, a green run on your machine
-means a green run in CI. There is no second copy of the commands to keep in
-sync.
+| Runner | Runs |
+| :--- | :--- |
+| `ubuntu-latest` | `scripts/lint.sh`, `scripts/test.sh` |
+| `macos-latest` | `scripts/lint.sh`, `scripts/test.sh` |
+| `windows-latest` | `scripts/lint.ps1`, `scripts/test.ps1` |
+
+CI calls the same scripts you run locally, so a green run on your machine means
+a green run in CI. Covering all three platforms means code that works on your
+machine is checked against the other two before it reaches `main` — and it is
+what keeps each `.sh`/`.ps1` pair honest, since both halves run on every push.
+
+`fail-fast` is off, so one platform breaking still lets the others report.
 
 The workflow checks out the repository and nothing else. Add your language
 setup — `actions/setup-node`, `setup-python`, `setup-go` — and your dependency
 install step at the marked spot in each job; the file has commented examples.
+
+**Trimming it.** Three platforms is the right default for code meant to run
+anywhere, but it is not free: on a private repository, Windows minutes bill at
+2× and macOS at 10×. If a project only ever runs in one place, cut the `os:`
+list in the matrix down to `[ubuntu-latest]`.
 
 ---
 
