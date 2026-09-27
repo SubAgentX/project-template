@@ -1,0 +1,10 @@
+# Normalize line endings so shell scripts keep working after a Windows
+# checkout. CRLF in a .sh file breaks the shebang and the script will not run.
+* text=auto eol=lf
+
+*.sh  text eol=lf
+*.ps1 text eol=lf
+
+# Windows-native files that genuinely want CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf

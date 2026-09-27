@@ -41,13 +41,22 @@ cd my-app && rm -rf .git && git init
 
 ## Then bootstrap it
 
+**macOS, Linux, Git Bash or WSL:**
+
 ```bash
 ./scripts/init.sh "My App" "SubAgentX/my-app"
 ```
 
-That script replaces the placeholders, deletes the `.gitkeep` files, resets the
-changelog, copies `.env.example` to `.env`, strips this template section from the
-README, and finally removes itself. Run it with no arguments to be prompted.
+**Windows PowerShell:**
+
+```powershell
+./scripts/init.ps1 "My App" "SubAgentX/my-app"
+```
+
+Both scripts do exactly the same thing: replace the placeholders, tidy the
+`.gitkeep` files, reset the changelog, copy `.env.example` to `.env`, strip this
+template section from the README, and then remove themselves. Run either with no
+arguments to be prompted instead. You only need to run one — each removes both.
 
 <!-- TEMPLATE:END -->
 
@@ -91,10 +100,12 @@ usually enough.
 │   └── workflows/          # CI/CD pipeline definitions (GitHub Actions)
 ├── docs/                   # Long-form documentation, diagrams, ADRs
 ├── scripts/                # Setup, build, deploy and maintenance scripts
-│   └── init.sh             # One-time bootstrap; deletes itself after running
+│   ├── init.sh             # One-time bootstrap (bash); deletes itself
+│   └── init.ps1            # Same, for Windows PowerShell
 ├── src/                    # Application source code
 ├── tests/                  # Automated tests, mirroring the src/ layout
 ├── .editorconfig           # Editor formatting rules shared across IDEs
+├── .gitattributes          # Keeps LF line endings so scripts survive Windows
 ├── .env.example            # Template for environment variables (copy to .env)
 ├── .gitignore              # Files and folders git should never track
 ├── CHANGELOG.md            # Human-readable record of notable changes

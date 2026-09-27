@@ -31,6 +31,8 @@ fi
 
 echo "==> Stripping the template-usage section from README.md"
 sed_i '/<!-- TEMPLATE:START -->/,/<!-- TEMPLATE:END -->/d' README.md
+# Drop the blank lines the removal leaves at the top of the file.
+sed_i '/./,$!d' README.md
 
 echo "==> Setting project name to '$PROJECT_NAME'"
 sed_i "s|^# Project Name|# ${PROJECT_NAME}|" README.md
@@ -78,10 +80,10 @@ if [[ ! -f .env && -f .env.example ]]; then
   cp .env.example .env
 fi
 
-echo "==> Removing this bootstrap script"
-rm -- "$ROOT/scripts/init.sh"
-# This script was the only thing in scripts/, so restore the placeholder to
-# keep the directory in version control.
+echo "==> Removing the bootstrap scripts"
+rm -f -- "$ROOT/scripts/init.sh" "$ROOT/scripts/init.ps1"
+# The bootstrap scripts were the only thing in scripts/, so restore the
+# placeholder to keep the directory in version control.
 if [[ -z "$(find "$ROOT/scripts" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
   echo "# Helper scripts (build, setup, deploy) live here." > "$ROOT/scripts/.gitkeep"
 fi
