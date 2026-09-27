@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push supersedes the run already in flight for the same branch, so
+# queued runs do not pile up on a busy pull request.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: these jobs only ever need to read the repository.
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # ---------------------------------------------------------------
+      # Add your language's setup step here. A few common ones:
+      #
+      #   - uses: actions/setup-node@v7
+      #     with: { node-version: '20', cache: 'npm' }
+      #
+      #   - uses: actions/setup-python@v7
+      #     with: { python-version: '3.12', cache: 'pip' }
+      #
+      #   - uses: actions/setup-go@v7
+      #     with: { go-version: '1.22', cache: true }
+      #
+      # Then install dependencies, e.g. `npm ci` or `pip install -r
+      # requirements.txt`, before the step below runs.
+      # ---------------------------------------------------------------
+
+      - name: Run linter
+        run: |
+          if [ -x scripts/lint.sh ]; then
+            ./scripts/lint.sh
+          else
+            echo "::notice title=Lint skipped::scripts/lint.sh is missing or not executable."
+          fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Add the same setup and dependency-install steps as above.
+
+      - name: Run tests
+        run: |
+          if [ -x scripts/test.sh ]; then
+            ./scripts/test.sh
+          else
+            echo "::notice title=Tests skipped::scripts/test.sh is missing or not executable."
+          fi

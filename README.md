@@ -76,6 +76,7 @@ arguments to be prompted instead. You only need to run one — each removes both
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Testing](#testing)
+- [Continuous integration](#continuous-integration)
 - [Contributing](#contributing)
 - [License](#license)
 - [What else to put in this README](#what-else-to-put-in-this-readme)
@@ -97,11 +98,14 @@ usually enough.
 ```
 .
 ├── .github/
-│   └── workflows/          # CI/CD pipeline definitions (GitHub Actions)
+│   └── workflows/
+│       └── ci.yml          # Lints and tests every push and pull request
 ├── docs/                   # Long-form documentation, diagrams, ADRs
 ├── scripts/                # Setup, build, deploy and maintenance scripts
 │   ├── init.sh             # One-time bootstrap (bash); deletes itself
-│   └── init.ps1            # Same, for Windows PowerShell
+│   ├── init.ps1            # Same, for Windows PowerShell
+│   ├── lint.sh             # Lint entry point — CI calls this
+│   └── test.sh             # Test entry point — CI calls this
 ├── src/                    # Application source code
 ├── tests/                  # Automated tests, mirroring the src/ layout
 ├── .editorconfig           # Editor formatting rules shared across IDEs
@@ -181,11 +185,29 @@ Document every environment variable in `.env.example`. Keep this table in sync.
 ## Testing
 
 ```bash
-# <your test command here>
+./scripts/test.sh          # run the test suite
+./scripts/lint.sh          # run the linter
 ```
 
-Explain how to run a single test, and what the CI pipeline checks on every pull
-request.
+Both start as stubs that print a reminder and exit 0. Edit them to call your
+real tools — the comments at the top of each file list the usual commands per
+language. Exit non-zero on failure; CI reads the exit status.
+
+Explain here how to run a single test once the suite exists.
+
+## Continuous integration
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to
+`main` and on every pull request. It runs `scripts/lint.sh` and
+`scripts/test.sh` as two parallel jobs, so a failure tells you which one broke.
+
+Because CI calls the same scripts you run locally, a green run on your machine
+means a green run in CI. There is no second copy of the commands to keep in
+sync.
+
+The workflow checks out the repository and nothing else. Add your language
+setup — `actions/setup-node`, `setup-python`, `setup-go` — and your dependency
+install step at the marked spot in each job; the file has commented examples.
 
 ---
 
