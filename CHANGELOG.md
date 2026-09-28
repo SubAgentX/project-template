@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 - Initial project scaffold.
+- `CLAUDE.md` recording the CI-to-scripts contract and the repo's conventions.
 
 ### Changed
 
